@@ -9,6 +9,20 @@
     
     <script type="text/javascript" charset="utf-8">
     
+        function reloadtogetclassid(form)
+        {
+            var cursoid=form.dbCurso.options[form.dbCurso.options.selectedIndex].value;
+            self.location='insertobservation.php?dbCurso=' + cursoid ;
+        }
+        
+        function getstudentidfromdropdown(form)
+        {
+            
+            var studenid=form.dbAlumno.options[form.dbAlumno.options.selectedIndex].value;
+            document.getElementById("studentid").value = studenid;
+            //self.location='insertobservation.php?dbAlumno=' + val ;
+        }
+        
         function SearchStudent()
         {
             var insertObserForm = document.getElementById ("observador");
@@ -125,6 +139,9 @@
             echo "</br>";
             echo "<a href='logout.php'>Logout</a>";
     
+            //variable to get the curso id if selected
+            $dbCursoid=$_GET['dbCurso'];
+            
     ?>
     <div align="center">
         <form name='observador' id='observador' method='post'>
@@ -140,6 +157,73 @@
                         </td>
                         
                         <td>
+                            Curso:
+                            <select name='dbCurso' id='dbCurso' onchange="reloadtogetclassid(this.form)">
+                                <option value="0">Seleccione el Curso</option>
+                                <?php
+                                
+                                    //this snipet gets the id and class from the database
+                                    //to populate the curso drowpdown. when the dropdown changes
+                                    //dbcurso will have an id and with the onchange parameter
+                                    //the form gets reloaded and the id gets retrieved 
+                                    //and stored on the variable dbCursoid which is used for the
+                                    //dropdown curso
+                                    
+                                    $sql =  "SELECT `Class ID`,`Class` ".
+                                            "FROM `Class`";
+                                    
+                                    $recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
+                                    
+                                    if (!$link) 
+                                    {
+                                        die('Could not connect: ' . mysql_error());
+                                        echo "something wrong with the link to the database";
+                                    }
+                                    else //if connection is good...
+                                    {
+                                        while ($row = mysql_fetch_array($recordset)) 
+                                        {
+                                            // then adds that as one of the options in the dropdown
+                                            echo "<option value='" . $row['Class ID'] . "'>" . $row['Class'] . "</option>";
+                                        }
+                                    }
+                                ?>
+                            </select>
+                            
+                            Alumnos:
+                            <select name='dbAlumno' id='dbAlumno' onchange="getstudentidfromdropdown(this.form)">
+                                <option value="0">Seleccione el Alumno</option>
+                                <?php
+                                    
+                                    if(isset($dbCursoid) and strlen($dbCursoid) > 0)
+                                    {
+                                        $sql =  "SELECT `Student ID`,CONCAT(`Student First`,' ',`Student Last`) AS name,`Class ID` ".
+                                                "FROM `Student`" .
+                                                "WHERE `Class ID` = $dbCursoid";
+                                        //$quer="SELECT DISTINCT subcategory FROM subcategory where cat_id=$cat order by subcategory"; 
+                                    }
+                                    
+                                    
+                                    $recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
+                                    
+                                    if (!$link) 
+                                    {
+                                        die('Could not connect: ' . mysql_error());
+                                        echo "something wrong with the link to the database";
+                                    }
+                                    else //if connection is good...
+                                    {
+                                        while ($row = mysql_fetch_array($recordset)) 
+                                        {
+                                            // then adds that as one of the options in the dropdown
+                                            echo "<option value='" . $row['Student ID'] . "'>" . $row['name'] . "</option>";
+                                        }
+                                    }
+                                ?>
+                            </select>
+                            </br>
+                            </br>
+                            
                             Codigo:</br>
                             <input type="text" name="studentid" id="studentid"></br>
                             <button onClick="SearchStudent()">Buscar Estudiante</button>

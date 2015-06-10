@@ -165,7 +165,8 @@
 			                    {
 									echo '</br>';	
 									echo '<input type="radio" name="AddOrMod" id="rep" > Reporte</input>';
-								} 
+								}
+								 
 			                echo '</td>';
 				        
 		
@@ -185,20 +186,36 @@
 			
 			            echo '</tr>'; // row 2 ends
 						
-						//////////////////////////////////////////////////////////////
-						
-						//echo '<tr>'; // row 3 Begins
-							//echo '<td align = "center">';
-								
-							//echo '</td>';
-						//echo '</tr>'; // row 2 ends	
-						
+					
 				    echo "</table>";
 					echo '</br>';
 					
 					echo '<button type="button" name="btnProceed" align="center" id="btnProceed" onclick="CheckAndSubmit()" >Proceder</button>';
 				    //echo "</div>";
-					echo '</div>';			
+				    ?>
+    				    <table align="center">
+                            <tr>
+                                <td>                                                    
+                                   <?php 
+                                   
+                                        include("functions.php"); // get the include file to execute the function
+                                        
+                                        //show a table with the total of goal and indicators so far entered by the user
+                                        $rs_totalGoalandIndicatorsPerUser = searchTotalGandIenteredPerUser($userID);
+                                        echo getHtmlTableTotalGandIenteredPerUser($rs_totalGoalandIndicatorsPerUser);
+                                        
+                                        //show table with all the goals and indicators so far entered for the period
+                                        
+                                        $rs_goalIndicatorPerUser = SearchGoalandIndicatorsPerUser($userID); //get the record set of goal ids and ids
+                                        echo getHtmlTable4GandIEnteredPerUser($rs_goalIndicatorPerUser); //populate a table out of the record set.
+                                   
+                                    ?>
+                                </td>
+                            </tr>
+                         </table> 
+    					
+                    <?php
+                   echo "</div>"; 			
 			    echo "</form>"; // end of the form
 			echo "<body>";
 		echo "<html>";

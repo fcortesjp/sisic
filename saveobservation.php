@@ -67,8 +67,7 @@
                         $obsr_id = $_POST["update"]; 
                             
                         $updatesql =    "UPDATE `$table` ".
-                                        "SET user_id = '$userID', ".
-                                            "date_open = '$date_open', ".
+                                        "SET date_open = '$date_open', ".
                                             "date_close = '$date_close', ".
                                             "category = '$cat', ".
                                             "importance = '$importance', ".

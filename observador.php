@@ -22,10 +22,29 @@
             menuForm.action = "preupdateobservation.php";
             menuForm.submit();
         }
-        function PrintObserv()
+        function PrintObservStudent()
         {
             var menuForm = document.getElementById ("observador");
-            menuForm.action = "printobservation.php";
+            menuForm.action = "printobservationstudent.php";
+            menuForm.submit();
+        }
+        
+        function PrintObservClass()
+        {
+            var menuForm = document.getElementById ("observador");
+            menuForm.action = "printobservationclass.php";
+            menuForm.submit(); 
+        }
+        function PrintObservSchool()
+        {
+            var menuForm = document.getElementById ("observador");
+            menuForm.action = "printobservationschool.php";
+            menuForm.submit(); 
+        }
+        function ListObserv()
+        {
+            var menuForm = document.getElementById ("observador");
+            menuForm.action = "listobservation.php";
             menuForm.submit();
         }
         
@@ -88,7 +107,11 @@
                 
                 
                 <table align="center" border="0">
-                    
+                    <tr>
+                        <td colspan="2">
+                            Insertar/Actualizar Observaciones
+                        </td>
+                    </tr>
                     <tr>
                         
                         <td> <!-- buton de insertar observacion -->
@@ -98,9 +121,40 @@
                         <td> <!-- buton de actualizar observacion -->
                             <button type="button" style="height: 100px; width: 100px" name="ActualizarObservacion" align="center" id="ActualizarObservacion" onclick="UpdateObserv()" >Actualizar Observacion</button>
                         </td>
+                    </tr>
+                </table>
+                
+                 <table align="center" border="0">
+                    <tr>
+                        <td colspan="3" align="center">
+                            Imprimir Observaciones
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> <!-- buton de Imprimir observacion por alumno -->
+                            <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacion" align="center" id="ImprimirObservacion" onclick="PrintObservStudent()" >Imprimir Observacion Alumno</button>
+                        </td>
                         
-                        <td> <!-- buton de Imprimir observacion -->
-                            <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacion" align="center" id="ImprimirObservacion" onclick="PrintObserv()" >Imprimbir Observacion</button>
+                        <td> <!-- buton de Imprimir observacion por curso-->
+                            <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacionCurso" align="center" id="ImprimirObservacionCurso" onclick="PrintObservClass()" >Imprimir Observacion Curso</button>
+                        </td>
+                        
+                        <td> <!-- buton de Imprimir observacion para todo el colegio-->
+                            <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacionSchool" align="center" id="ImprimirObservacionSchool" onclick="PrintObservSchool()" >Imprimir Observacion Colegio</button>
+                        </td>
+                    </tr>
+                 </table>
+                 
+                 <table align="center" border="0">
+                    <tr>
+                        <td align="center">
+                            Enlistar Observaciones Hechas por el usuario
+                        </td>
+                    </tr>
+                    <tr>
+                        
+                        <td align="center"> <!-- buton de ver observaciones hechas por el usuario logeado-->
+                            <button type="button" style="height: 100px; width: 100px" name="ListObservacion" align="center" id="ListObservacion" onclick="ListObserv()" >Enlistar Observaciones</button>
                         </td>
                         
                     </tr>
@@ -113,15 +167,33 @@
             
             <?php elseif (isset($_SESSION['currentUser']) && $menu == 'teachermenu') :  ?>
                 
-                <table align="center" border="0">
-                    
-                    <td> <!-- buton de insertar observacion -->
-                        <button type="button" style="height: 100px; width: 100px" name="InsertarObservacion" align="center" id="InsertarObservacion" onclick="InsertObserv()" >Insertar Observacion</button>
-                    </td>   
-                    
-                     <td> <!-- buton de actualizar observacion -->
-                        <button type="button" style="height: 100px; width: 100px" name="ActualizarObservacion" align="center" id="ActualizarObservacion" onclick="UpdateObserv()" >Actualizar Observacion</button>
-                    </td>
+                 <table align="center" border="0">
+                    <tr>
+                        <td colspan="2" align="center">
+                            Insertar/Actualizar Observaciones
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> <!-- buton de insertar observacion -->
+                            <button type="button" style="height: 100px; width: 100px" name="InsertarObservacion" align="center" id="InsertarObservacion" onclick="InsertObserv()" >Insertar Observacion</button>
+                        </td>   
+                        
+                         <td> <!-- buton de actualizar observacion -->
+                            <button type="button" style="height: 100px; width: 100px" name="ActualizarObservacion" align="center" id="ActualizarObservacion" onclick="UpdateObserv()" >Actualizar Observacion</button>
+                        </td>
+                    </tr>
+                </table>
+                 <table align="center" border="0">
+                    <tr>
+                        <td colspan="2" align="center">
+                            Enlistar Observaciones Hechas por el usuario
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"> <!-- buton de ver observaciones hechas por el usuario logeado -->
+                            <button type="button" style="height: 100px; width: 100px" name="ListObservacion" align="center" id="ListObservacion" onclick="ListObserv()" >Enlistar Observaciones</button>
+                        </td>
+                    </tr>
                 </table>
                 
                 </br>

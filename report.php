@@ -120,6 +120,8 @@
                                 {
                                 	$per = $_POST['rdPeriod']; // get the period indicated by user
 									
+									echo '<th><h1>Periodo '.$per.'</h1></th>';
+                                    
                                     include("functions.php"); // get the include file to execute the function
 									
 									//show a table with the total of goal and indicators so far entered for the period

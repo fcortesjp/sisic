@@ -258,9 +258,9 @@
                         <td>
                             <select name="importance" id="importance"/></br>
                                 <option value="0">--Escoja--</option>
-                                <option value="1" <?php echo '',($categ == 1 ? 'selected' : '');?>>Bajo</option>
-                                <option value="2" <?php echo '',($categ == 2 ? 'selected' : '');?>>Medio</option>
-                                <option value="3" <?php echo '',($categ == 3 ? 'selected' : '');?>>Alto</option>
+                                <option value="1" <?php echo '',($import == 1 ? 'selected' : '');?>>Bajo</option>
+                                <option value="2" <?php echo '',($import == 2 ? 'selected' : '');?>>Medio</option>
+                                <option value="3" <?php echo '',($import == 3 ? 'selected' : '');?>>Alto</option>
                             </select>
                         </td>    
                     </tr>
