@@ -9,11 +9,13 @@
     
     <script type="text/javascript" charset="utf-8">
     
-        function SearchClass()
+        function SearchClass(form)
         {
-            var insertObserForm = document.getElementById ("observadorclass");
-            insertObserForm.action = "printobservationclass.php";
-            insertObserForm.submit();
+            var classid=form.dbClass.options[form.dbClass.options.selectedIndex].value;
+            var classname=form.dbClass.options[form.dbClass.options.selectedIndex].text;
+            var observadorclassform = document.getElementById ("observadorclass");
+            observadorclassform.action = "printobservationclass.php?dbclassid=" + classid + "&classname=" + classname;
+            observadorclassform.submit();
         }
         
     </script>
@@ -32,6 +34,8 @@
             $userID = $_SESSION['currentID'];
             $role = $_SESSION['role'];
             
+            $dbclassid = $_GET['dbclassid'];
+            $classname = $_GET['classname'];
             //menu to display variable
             
             $menu ="";
@@ -50,7 +54,7 @@
         <form name='observadorclass' id='observadorclass' method='post'>
         
             <h3>Imprimir Observadores de la Clase</h3>
-                <a href="observador.php">regresar</a>
+                <a href="observador.php">Regresar</a>
                 </br>
                 </br>
                 <table align="center" border="1">
@@ -63,7 +67,7 @@
                         
                         <td>
                             Clase:</br>
-                                <select name='class' id='class'>
+                                <select name='dbClass' id='dbClass'>
                                 <?php
                                    
                                     $sql =  "SELECT `Class ID`, Class ".
@@ -79,6 +83,7 @@
                                     }
                                     else //if connection is good...
                                     {
+                                        echo "<option value='0'>Selecione un curso</option>";
                                         while ($row = mysql_fetch_array($recordset)) 
                                         {
                                             // then adds that as one of the options in the dropdown
@@ -87,8 +92,8 @@
                                     }
                                 ?>
                             </select>
-                            </br>
-                            <button onClick="SearchClass()">Buscar Observadores de la Clase</button>
+                        </br></br>
+                            <button onClick="SearchClass(this.form)">Buscar Observadores de la Clase</button>
                         </td>
                     <tr>   
                 </table>
@@ -97,11 +102,10 @@
                 <table align="center" border="1">
                            
                             <?php
-                               
-                                $class_id = "";
+                                
                                 $out ="";
                                 
-                                if(trim($_POST['class']) !== "")
+                                if(isset($dbclassid) and strlen($classname) > 0)
                                 {
                                     include("config-CRDB.php");
                                     
@@ -112,11 +116,17 @@
                                     }
                                     else //if connection is good...
                                     {
-                                        $class_id = $_POST['class'];
                                         
-                                        $sqlselect =  "SELECT `Student ID`, `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `Student` WHERE `Class ID` = '$class_id';"; 
+                                        $sqlselect =  "SELECT `Student ID`, `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `Student` WHERE `Class ID` = '$dbclassid';"; 
                                         
                                         $qryrecordset = mysql_query($sqlselect);
+                                        
+                                        echo "<p class='page'></p>";
+                                        echo "</br>";
+                                        echo "<h3>*****************************************************************</h3>";
+                                        echo "<h3>". $classname ."</h3>";
+                                        echo "<h3>*****************************************************************</h3>";
+                                            
                                         
                                         while ($row = mysql_fetch_array($qryrecordset)) //put each reacord fetched into an associative array variable.
                                         {
@@ -125,8 +135,7 @@
                                             
                                             
                             ?>
-                    
-                <p class="page"></p> 
+                <p class="page"></p>
                 </br>
                 <table border="0">
                     <tr>
@@ -170,9 +179,8 @@
                                
                             <?php    
                                                 
-                                            $table = 'Observations';
-                                        
-                                            $sqlselectResult =  "SELECT Class.Class, date_open, category, importance, observation, objetive, compromise, CONCAT(Class.Class,'-',Subject) as subject, date_close ". 
+                                            
+                                            $sqlselectResult =  "SELECT Class.Class AS CURSO, date_open AS FECHA_A , category AS CATEGORIA, importance AS IMPORTANCIA, observation AS OBSERVACION, objetive AS OBJETIVO, compromise AS COMPROMISO, CONCAT(Class.Class,'-',Subject) as MATERIA, date_close AS ESTADO ". 
                                                                 "FROM `Observations` ". 
                                                                 "LEFT JOIN `Teacher` ".
                                                                 "ON Observations.user_id = Teacher.ID ".
@@ -195,7 +203,7 @@
                                             {
                                                    
                                                 $catgry ="";
-                                                switch ($line["category"]) 
+                                                switch ($line["CATEGORIA"]) 
                                                 {
                                                     case 1:
                                                         $catgry = "Convivencia";
@@ -215,7 +223,7 @@
                                                 }
                                                 
                                                 $imptce ="";
-                                                switch ($line["importance"]) 
+                                                switch ($line["IMPORTANCIA"]) 
                                                 {
                                                     case 1:
                                                         $imptce = "Bajo";
@@ -229,15 +237,15 @@
                                                 }
                                                     
                                                 $out .= "<tr>"; //add the start of the row for the record on the table
-                                                    $out .= '<td>'.$line["Class"].'</td>';
-                                                    $out .= '<td>'.$line["date_open"].'</td>';
+                                                    $out .= '<td>'.$line["CURSO"].'</td>';
+                                                    $out .= '<td>'.$line["FECHA_A"].'</td>';
                                                     $out .= '<td>'.$catgry.'</td>';
                                                     $out .= '<td>'.$imptce.'</td>';
-                                                    $out .= '<td>'.$line["observation"].'</td>';
-                                                    $out .= '<td>'.$line["objetive"].'</td>';
-                                                    $out .= '<td>'.$line["compromise"].'</td>';
-                                                    $out .= '<td>'.$line["subject"].'</td>';
-                                                    $status = ''.($line["date_close"] == "0000-00-00" ?'Abierto':'Cerrado');
+                                                    $out .= '<td>'.$line["OBSERVACION"].'</td>';
+                                                    $out .= '<td>'.$line["OBJETIVO"].'</td>';
+                                                    $out .= '<td>'.$line["COMPROMISO"].'</td>';
+                                                    $out .= '<td>'.$line["MATERIA"].'</td>';
+                                                    $status = ''.($line["ESTADO"] == "0000-00-00" ?'Abierto':'Cerrado');
                                                     $out .= '<td>'.$status.'</td>';
                                                 $out .= "</tr>"; //add the close of the row
                                             }
@@ -259,24 +267,33 @@
                     </br>
                     </br>
                     <table border="0">
-                        <tr align="center">
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Padre
-                            </td>
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Alumno
-                            </td>
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Director
-                            </td>
-                        </tr>
-                        
-                    </table>
-                    </br>
-                    </br>
+                    <tr align="center">
+                        <td colspan="3">
+                            <textarea style="overflow:auto;resize:none;width:800px;height:100px"readonly>Comentarios:</textarea>
+                        </td>
+                    </tr>
+                    <tr align="center">
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Padre
+                        </td>
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Alumno
+                        </td>
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Director
+                        </td>
+                    </tr>
+                    
+                </table>
+                </br>
+                </br>
+                <a href="observador.php">Regresar</a>
                            
                            <?php     
                                         }    
@@ -284,7 +301,7 @@
                                 }
                             ?>
                     
-                <a href="observador.php">regresar</a>
+                
                 
         </form>
 

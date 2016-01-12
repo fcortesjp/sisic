@@ -9,33 +9,47 @@
 	
 	<script type="text/javascript" charset="utf-8">
 	
-		function LogEInd() 
-		{
-			var menuForm = document.getElementById ("menu");
-			menuForm.action = "admin.php";
-			menuForm.submit();
-			//alert("Submit button clicked!");	
-		}
 		
-		//matricularestudiante.php
-		
+		//for admins only
 		function MatEst() 
 		{
 			var menuForm = document.getElementById ("menu");
-			menuForm.action = "matricularestudiante.php";
+			menuForm.action = "matriculas.php";
 			menuForm.submit();
-			//alert("Submit button clicked!");	
 		}
-	
-	   //insertobservation.php
-        
-        function Observador() 
+
+		//for admins only
+		function GestionDeProfesores() 
+		{
+			var menuForm = document.getElementById ("menu");
+			menuForm.action = "profesores.php";
+			menuForm.submit();
+		}
+		// for admins only
+		function Materias()
+		{
+		    var menuForm = document.getElementById ("menu");
+            menuForm.action = "materias.php";
+            menuForm.submit();
+		}
+		//for teachers and admins
+		function Observador() 
         {
             var menuForm = document.getElementById ("menu");
             menuForm.action = "observador.php";
             menuForm.submit();
             //alert("Submit button clicked!");  
         }
+
+        //for teachers and admins
+		function LogEInd() 
+		{
+			var menuForm = document.getElementById ("menu");
+			menuForm.action = "admin.php";
+			menuForm.submit();
+		}
+		
+		
 	</script>
 	
 </head>
@@ -97,63 +111,37 @@
 				<table align="center" border="0">
 				
 					<tr>
-						<td align = "center" colspan="2"> <!-- colspan makes the cell span over 2 cells if the tables is 2 cells wide -->
-							Matr&iacute;culas
+						<td align = "center"> 
+							Matr&iacute;culas</br>
+							<button type="button" style="height: 100px; width: 100px" name="MatricularEstudiante" align="center" id="MatricularEstudiante" onclick="MatEst()" >Matriculas de Estudiante</button>
 						</td>
+						<td align = "center"> 
+                            Profesores</br>
+                            <button type="button" style="height: 100px; width: 100px" name="gestiondeprofesores" align="center" id="gestiondeprofesores" onclick="GestionDeProfesores()" >Gestion de Profesores</button>
+                        </td>
+                        <td align = "center"> 
+                            Materias</br>
+                            <button type="button" style="height: 100px; width: 100px" name="gestiondeprofesores" align="center" id="gestiondeprofesores" onclick="Materias()" >Materias</button>
+                        </td>
+                        
 					</tr>
 					
 					<tr>
 						
-						<td> <!-- buton de Matricular Alumno -->
-							<button type="button" style="height: 100px; width: 100px" name="MatricularEstudiante" align="center" id="MatricularEstudiante" onclick="MatEst()" >Matricular Estudiante</button>
-						</td>
-						
-						<td> <!-- buton de Editar Estudiante Existente -->
-							<button type="button" style="height: 100px; width: 100px" name="EditarInformacionEstudianteExistente" align="center" id="EditarInformacionEstudianteExistente" onclick="CheckAndSubmit()" >Editar Informaci&oacute;n Estudiante Existente</button>
-						</td>
-						
-					</tr>
-					
-					<tr>
-						
-						<td> <!-- buton de Cancelar Matricula -->
-							<button type="button" style="height: 100px; width: 100px" name="CancelarMatricula" align="center" id="CancelarMatricula" onclick="CheckAndSubmit()" >Cancelar Matricula</button>
-						</td>
-						
-						<td> <!-- buton de Generar reportes de matriculas -->
-							<button type="button" style="height: 100px; width: 100px" name="GenerarReporteDeMatriculas" align="center" id="GenerarReporteDeMatriculas" onclick="CheckAndSubmit()">Generar Reporte De Matr&iacute;culas</button>
-						</td>
-						
-					</tr>
-					
-					<tr>
-						<td align = "center" colspan="2">
-							Observador
-						</td>
-					</tr>
-					
-					<tr>
-						
-						<td align = "center" colspan="2"> <!-- button for the "observador del alumno" -->
+						<td align = "center" colspan="3"> <!-- button for the "observador del alumno" -->
+						    Observadores</br>
 							<button type="button" style="height: 100px; width: 100px" name="ObservadorDelAlumno" align="center" id="ObservadorDelAlumno" onclick="Observador()" >Observador Del Alumno</button>
 						</td>
 						
 					</tr>
 					
 					<tr>
-						<td align = "center" colspan="2">
-							Logros e Indicadores
+						<td align = "center" colspan="3">
+							Logros e Indicadores</br>
+							<button type="button" style="height: 100px; width: 100px" name="LogroseIndicadores" align="center" id="LogroseIndicadores" onclick="LogEInd()" >Logros e Indicadores</button>
 						</td>
 					</tr>
 					
-					<tr>
-						
-						<td align = "center" colspan="2"> <!-- button for the "Logros e Indicadores" -->
-							<button type="button" style="height: 100px; width: 100px" name="LogroseIndicadores" align="center" id="LogroseIndicadores" onclick="LogEInd()" >Logros e Indicadores</button>
-						</td>
-						
-					</tr>
-				
 				</table>
 				
 		
@@ -178,7 +166,7 @@
 					
 					<tr>
                         <td align = "center" colspan="2">
-                            Observador
+                            Observadores
                         </td>
                     </tr>
                     
@@ -189,6 +177,19 @@
                         </td>
                         
                     </tr>
+                    <tr>
+						<td align = "center"> 
+							Matr&iacute;culas
+						</td>
+					</tr>
+					
+					<tr>
+						
+						<td align = "center"> <!-- buton de Matricular Alumno -->
+							<button type="button" style="height: 100px; width: 100px" name="MatricularEstudiante" align="center" id="MatricularEstudiante" onclick="MatEst()" >Matriculas de Estudiante</button>
+						</td>
+						
+					</tr>
 				
 				</table>
 				

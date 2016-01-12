@@ -31,7 +31,7 @@
 	    					return; //exit the function.
 	    				}
 		        	}
-		        	if (!add.checked && !mod.checked ) //if neither the add or the mod are checked then
+		        	if (!add.checked && !mod.checked) //if neither the add or the mod are checked then
 		        	{
 		        		alert ("You need to choose to add or modify before before proceeding"); // advise the user to check on add or mod
 		        		
@@ -80,7 +80,7 @@
 					"INNER JOIN Class ".
 					"ON `Class Copesal`.ClassID = Class.`Class ID` ".
 					//"WHERE TeacherID = '$userID' ".
-					"ORDER BY Class.Order;";
+					"ORDER BY Class.`Class ID`;";
 		} 
 		else 
 		{
@@ -89,16 +89,12 @@
 					"INNER JOIN Class ".
 					"ON `Class Copesal`.ClassID = Class.`Class ID` ".
 					"WHERE TeacherID = '$userID' ".
-					"ORDER BY Class.Order;";
+					"ORDER BY Class.`Class ID`;";
 			
 		}
 		
-		
-		
 				
 		$recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
-		
-		
 		
 		// Close de conection
 					

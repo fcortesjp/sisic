@@ -83,7 +83,7 @@
                                 </br>
                                 Los cambios en la observacion han sido guardados Satisfactoriamente!
                                 </br>
-                                <a href="observador.php">regresar</a>
+                                <a href="observador.php">Regresar</a>
                                 
                             <?php   
                         }
@@ -96,7 +96,7 @@
                                 </br>
                                 <?php echo $obsr_id; ?>
                                 </br>
-                                <a href="observador.php">regresar</a>
+                                <a href="observador.php">Regresar</a>
                                 </br>
                             <?php 
                             echo "Error insert: " . $updatesql . "<br>" . mysql_error($link);
@@ -114,7 +114,7 @@
                                 </br>
                                 La observacion ha sido guardada Satisfactoriamente!
                                 </br>
-                                <a href="observador.php">regresar</a>
+                                <a href="observador.php">Regresar</a>
                                 
                             <?php   
                         }
@@ -125,7 +125,7 @@
                                 La observacion no fue guarda!
                                 
                                 </br>
-                                <a href="observador.php">regresar</a>
+                                <a href="observador.php">Regresar</a>
                                 </br>
                             <?php 
                             echo "Error insert: " . $insertsql . "<br>" . mysql_error($link);

@@ -9,6 +9,14 @@
     
     <script type="text/javascript" charset="utf-8">
     
+        function DoTrimRemoveReturns(text)
+        {
+            text = text.replace(/[\s\t\n\r]/g,' '); //replace white, tabs, carriage returns for a space in any part of the string
+            text = text.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); // remove spaces at each end of the string
+            text = text.replace(/\s+/g," "); //this replaces multiple spaces for only one space.
+            return text; //return string fixed
+        }
+
         function SearchStudent()
         {
             var insertObserForm = document.getElementById ("observador");
@@ -23,7 +31,13 @@
             
             var id = document.getElementById("st_cod").value;
             
-            var date = document.getElementById("date_open").value;
+            var dateo = document.getElementById("date_open").value;
+
+            var datec = "";
+            if (document.getElementById("date_close"))
+            {
+                datec = document.getElementById("date_close").value;
+            }
             
             var name = document.getElementById("st_name").value;
             
@@ -35,54 +49,73 @@
             var importanceid = importancedd.options[importancedd.selectedIndex].value;
             var importancetext = importancedd.options[importancedd.selectedIndex].text;
             
-            var observ = document.getElementById("observation").value.replace(/^\s+|\s+$/g, '');
-            
-            var objective = document.getElementById("objective").value.replace(/^\s+|\s+$/g, ''); 
-            
-            var compromise = document.getElementById("compromise").value.replace(/^\s+|\s+$/g, ''); 
+            var observ = document.getElementById("observation").value;
+            observ = DoTrimRemoveReturns(observ);
+
+            var objective = document.getElementById("objective").value;
+            objective = DoTrimRemoveReturns(objective);
+
+            var compromise = document.getElementById("compromise").value; 
+            compromise = DoTrimRemoveReturns(compromise);
             
             var subjectdd = document.getElementById("dbClassSubject");
             var subjectid = subjectdd.options[subjectdd.selectedIndex].value;
             var subjecttext = subjectdd.options[subjectdd.selectedIndex].text;
-            
-            //document.getElementById("classsubject").value = subjecttext
             
             //check each required component
             
             if (id.length == 0)
             {
                 alert("el codigo no puede estar vacio");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
-            if (date.length == 0)
+            if (dateo.length == 0)
             {
                 alert("la fecha de apertura no puede estar vacia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
+            }
+            
+            if ((datec.length > 0) && (dateo.length > 0))
+            {
+                var date_c = new Date(datec).getTime();
+                var date_o = new Date(dateo).getTime();
+                //alert("this is happening" + date_c + "and" + date_o);
+
+                if (date_c < date_o)
+                {
+                    alert("la fecha de cierre no puede ser antes de la fecha de apertura");
+                    return false; // return to exit out of the function.
+                }
             }
             
             if (catid == 0)
             {
                 alert("Escoja una categoria");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (importanceid == 0)
             {
                 alert("Escoja un nivel de importancia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (observ.length == 0)
             {
                 alert("la observacion no puede estar vacia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
-            
+
             var message = "";
             
             message += "Codigo: " + id + "\n";
             message += "Alumno: " + name + "\n";
+            message += "Fecha Apertura: " + dateo + "\n";
+            if (datec.length > 0)
+            {   
+                message += "Fecha Cierre: " + datec + "\n";
+            }
             message += "Categoria: " + cattext + "\n";
             message += "Importancia: " + importancetext + "\n";
             message += "Observacion: " + observ + "\n";
@@ -90,12 +123,20 @@
             message += "Compromiso: " + compromise + "\n";
             message += "Materia: " + subjecttext + "\n";
             
-            var response=confirm("Desea guardar esta observacion: \n" + message);
+            var response=confirm("Desea guardar los cambios en esta observacion: \n" + message);
             if (response == true)
-            {
-                
+            {   
+                //save clean strings back into the input fields to be passed on for saving 
+                document.getElementById("observation").value = observ;
+                document.getElementById("objective").value = objective;
+                document.getElementById("compromise").value = compromise;
+
                 insertObserForm.action = "saveobservation.php";
                 insertObserForm.submit();
+            }
+            else
+            {
+                return false;
             }
         }
     
@@ -349,7 +390,7 @@
                 <input type="hidden" id="update" name="update" value="<?php echo $observation_id?>"/>
                 </br>
                 
-                <button onClick="saveObservation()">Guardar Observacion</button>
+                <button onClick="return saveObservation()">Guardar Observacion</button>
                 </br>
                 
                 <a href="preupdateobservation.php">regresar</a>

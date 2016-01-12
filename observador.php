@@ -41,6 +41,18 @@
             menuForm.action = "printobservationschool.php";
             menuForm.submit(); 
         }
+        function PrintObservUser()
+        {
+            var menuForm = document.getElementById ("observador");
+            menuForm.action = "printobservationuser.php";
+            menuForm.submit(); 
+        }
+        function ListObservUser()
+        {
+            var menuForm = document.getElementById ("observador");
+            menuForm.action = "listobservationuser.php";
+            menuForm.submit();
+        }
         function ListObserv()
         {
             var menuForm = document.getElementById ("observador");
@@ -102,10 +114,12 @@
         <form name='observador' id='observador' method='post'>
         
             <h3>Observador del Alumno</h3>
-                
+            </br>
+            <a href="menu.php">Regresar</a>
+            </br>    
             <?php if (isset($_SESSION['currentUser']) && $menu == 'directormenu') : ?>
                 
-                
+                    
                 <table align="center" border="0">
                     <tr>
                         <td colspan="2">
@@ -126,7 +140,7 @@
                 
                  <table align="center" border="0">
                     <tr>
-                        <td colspan="3" align="center">
+                        <td colspan="4" align="center">
                             Imprimir Observaciones
                         </td>
                     </tr>
@@ -142,6 +156,10 @@
                         <td> <!-- buton de Imprimir observacion para todo el colegio-->
                             <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacionSchool" align="center" id="ImprimirObservacionSchool" onclick="PrintObservSchool()" >Imprimir Observacion Colegio</button>
                         </td>
+                        
+                        <td> <!-- buton de Imprimir observacion por un usuario especifico-->
+                            <button type="button" style="height: 100px; width: 100px" name="ImprimirObservacionUser" align="center" id="ImprimirObservacionUser" onclick="PrintObservUser()" >Imprimir Observacion de un Usuario</button>
+                        </td>
                     </tr>
                  </table>
                  
@@ -154,9 +172,9 @@
                     <tr>
                         
                         <td align="center"> <!-- buton de ver observaciones hechas por el usuario logeado-->
-                            <button type="button" style="height: 100px; width: 100px" name="ListObservacion" align="center" id="ListObservacion" onclick="ListObserv()" >Enlistar Observaciones</button>
+                            <button type="button" style="height: 100px; width: 100px" name="ListObservacion" align="center" id="ListObservacion" onclick="ListObservUser()" >Enlistar Observaciones</button>
                         </td>
-                        
+                       
                     </tr>
                   
                 </table>
@@ -198,7 +216,7 @@
                 
                 </br>
                 
-                <a href="menu.php">regresar</a>
+                <a href="menu.php">Regresar</a>
             <?php endif; ?>
         </form>
     </div>

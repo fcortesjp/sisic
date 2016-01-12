@@ -77,7 +77,7 @@
 		        	// take each indicator box and put into a variable then 
 		        	//fix the string (trim it and remove carriage returns)
 		        	
-		        	var ind1 = document.getElementById("tbIndicator1").value 
+		        	var ind1 = document.getElementById("tbIndicator1").value; 
 		        	ind1 = DoTrimRemoveReturns(ind1);
 		        	var ind2 = document.getElementById("tbIndicator2").value; 
 		        	ind2 = DoTrimRemoveReturns(ind2);

@@ -9,11 +9,16 @@
     
     <script type="text/javascript" charset="utf-8">
     
-        function SearchClass()
+        function SearchAllClass()
         {
-            var insertObserForm = document.getElementById ("observadorschool");
-            insertObserForm.action = "printobservationschool.php";
-            insertObserForm.submit();
+            var observadorschoolform = document.getElementById ("observadorschool");
+            var response=confirm("Este seguro que desea proceder?");
+            if (response == true)
+            {
+                
+                observadorschoolform.action = 'printobservationschool.php?oktoproceed=' + response;
+                observadorschoolform.submit();
+            }
         }
         
     </script>
@@ -32,6 +37,8 @@
             $userID = $_SESSION['currentID'];
             $role = $_SESSION['role'];
             
+            $oktoproceed = $_GET['oktoproceed'];
+            
             //menu to display variable
             
             $menu ="";
@@ -49,46 +56,20 @@
     <div align="center">
         <form name='observadorschool' id='observadorschool' method='post'>
         
-            <h3>Imprimir Observadores de la Clase</h3>
-                <a href="observador.php">regresar</a>
+            <h3>Imprimir Observadores de Todo el Colegio</h3>
+                <a href="observador.php">Regresar</a>
                 </br>
                 </br>
                 <table align="center" border="1">
-                    
                     <tr>
-                        
-                        <td>
-                            Buscar Clase
-                        </td>
-                        
-                        <td>
-                            Clase:</br>
-                                <select name='class' id='class'>
-                                <?php
-                                   
-                                    $sql =  "SELECT `Class ID`, Class ".
-                                            "FROM `Class` ". 
-                                            "ORDER BY `Class ID;";
-                                    
-                                    $recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
-                                    
-                                    if (!$link) 
-                                    {
-                                        die('Could not connect: ' . mysql_error());
-                                        echo "something wrong with the link to the database";
-                                    }
-                                    else //if connection is good...
-                                    {
-                                        while ($row = mysql_fetch_array($recordset)) 
-                                        {
-                                            // then adds that as one of the options in the dropdown
-                                            echo "<option value='" . $row['Class ID'] . "'>" . $row['Class'] . "</option>";
-                                        }
-                                    }
-                                ?>
-                            </select>
+                        <td align="center">
+                            Este proceso puede tomar bastante tiempo y puede causar errores en el servidor.</br>
+                            Se recomienda generar <a href="printobservationclass.php">observadores por clase</a>
+                            </br></br>
+                            Desea Proceder?
+                            </br>    
                             </br>
-                            <button onClick="SearchClass()">Buscar Observadores de la Clase</button>
+                            <button onClick="SearchAllClass()">Buscar Todos los Observadores</button>
                         </td>
                     <tr>   
                 </table>
@@ -97,11 +78,12 @@
                 <table align="center" border="1">
                            
                             <?php
-                               
                                 $class_id = "";
+                                $class_name = "";
+                                $st_id="";
                                 $out ="";
                                 
-                                if(trim($_POST['class']) !== "")
+                                if(isset($oktoproceed) and $oktoproceed == true)
                                 {
                                     include("config-CRDB.php");
                                     
@@ -112,16 +94,29 @@
                                     }
                                     else //if connection is good...
                                     {
-                                        $class_id = $_POST['class'];
+                                        $sqlselectclass =  "SELECT `Class ID`, `Class` FROM `Class`;"; 
                                         
-                                        $sqlselect =  "SELECT `Student ID`, `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `Student` WHERE `Class ID` = '$class_id';"; 
+                                        $qryrecordsetclass = mysql_query($sqlselectclass);
                                         
-                                        $qryrecordset = mysql_query($sqlselect);
-                                        
-                                        while ($row = mysql_fetch_array($qryrecordset)) //put each reacord fetched into an associative array variable.
+                                        while ($rowC = mysql_fetch_array($qryrecordsetclass)) //put each reacord fetched into an associative array variable.
                                         {
-                                            $st_id = $row['Student ID'];
-                                            $nombre = $row['name'];
+                                            $class_id = $rowC['Class ID'];
+                                            $class_name = $rowC['Class'];
+                                            
+                                            echo "<p class='page'></p>";
+                                            echo "</br>";
+                                            echo "<h3>*****************************************************************</h3>";
+                                            echo "<h3>". $class_name ."</h3>";
+                                            echo "<h3>*****************************************************************</h3>";
+                                            
+                                            $sqlselectstudent =  "SELECT `Student ID`, `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `Student` WHERE `Class ID` = '$class_id';"; 
+                                            
+                                            $qryrecordsetstudent = mysql_query($sqlselectstudent);
+                                            
+                                            while ($rowS = mysql_fetch_array($qryrecordsetstudent)) //put each reacord fetched into an associative array variable.
+                                            {
+                                                $st_id = $rowS['Student ID'];
+                                                $nombre = $rowS['name'];
                                             
                                             
                             ?>
@@ -154,7 +149,7 @@
                     
                     <tr>
                         <td align="center">
-                            Informacion Alumno
+                            <b>Informacion Alumno</b>
                         </td>
                     </tr>  
                     <tr>  
@@ -169,83 +164,81 @@
                 </table>
                                
                             <?php    
-                                                
-                                            $table = 'Observations';
-                                        
-                                            $sqlselectResult =  "SELECT Class.Class, date_open, category, importance, observation, objetive, compromise, CONCAT(Class.Class,'-',Subject) as subject, date_close ". 
-                                                                "FROM `Observations` ". 
-                                                                "LEFT JOIN `Teacher` ".
-                                                                "ON Observations.user_id = Teacher.ID ".
-                                                                "LEFT JOIN `Class` ".
-                                                                "ON Observations.class_id = Class.`Class ID` ".
-                                                                "LEFT JOIN `Class Copesal` ".
-                                                                "ON Observations.subject_id = `Class Copesal`.`ID` ".
-                                                                "WHERE `student_id` = '$st_id';"; 
-                                        
-                                            $qryRSselectResult = mysql_query($sqlselectResult); //run query and get recordset
+                                          
+                                                $sqlselectResult =  "SELECT Class.Class AS CURSO, date_open AS FECHA_A , category AS CATEGORIA, importance AS IMPORTANCIA, observation AS OBSERVACION, objetive AS OBJETIVO, compromise AS COMPROMISO, CONCAT(Class.Class,'-',Subject) as MATERIA, date_close AS ESTADO ". 
+                                                                    "FROM `Observations` ". 
+                                                                    "LEFT JOIN `Teacher` ".
+                                                                    "ON Observations.user_id = Teacher.ID ".
+                                                                    "LEFT JOIN `Class` ".
+                                                                    "ON Observations.class_id = Class.`Class ID` ".
+                                                                    "LEFT JOIN `Class Copesal` ".
+                                                                    "ON Observations.subject_id = `Class Copesal`.`ID` ".
+                                                                    "WHERE `student_id` = '$st_id';"; 
                                             
-                                            //generate table using the data from the recordset
-                                            $out = '<table border="1">'; // set the start of the html output which is a table
-                                            for($i = 0; $i < mysql_num_fields($qryRSselectResult); $i++) //do this as many fields exist on the recordset
-                                            {
-                                                $aux = mysql_field_name($qryRSselectResult, $i); // get the title of the fields in the record set
-                                                $out .= "<th>".$aux."</th>"; //put the title in between row headers
-                                            }
-                                            while ($line = mysql_fetch_assoc($qryRSselectResult)) //put each reacord fetched into an associative array variable.
-                                            {
-                                                   
-                                                $catgry ="";
-                                                switch ($line["category"]) 
-                                                {
-                                                    case 1:
-                                                        $catgry = "Convivencia";
-                                                        break;
-                                                    case 2:
-                                                         $catgry = "Academico";
-                                                        break;
-                                                    case 3:
-                                                         $catgry = "Psicologico";
-                                                        break;
-                                                    case 4:
-                                                         $catgry = "Salud";
-                                                        break;
-                                                    case 0:
-                                                         $catgry = "Otro";
-                                                        break;
-                                                }
+                                                $qryRSselectResult = mysql_query($sqlselectResult); //run query and get recordset
                                                 
-                                                $imptce ="";
-                                                switch ($line["importance"]) 
+                                                //generate table using the data from the recordset
+                                                $out = '<table border="1">'; // set the start of the html output which is a table
+                                                for($i = 0; $i < mysql_num_fields($qryRSselectResult); $i++) //do this as many fields exist on the recordset
                                                 {
-                                                    case 1:
-                                                        $imptce = "Bajo";
-                                                        break;
-                                                    case 2:
-                                                         $imptce = "Medio";
-                                                        break;
-                                                    case 3:
-                                                         $imptce = "Alto";
-                                                        break;
+                                                    $aux = mysql_field_name($qryRSselectResult, $i); // get the title of the fields in the record set
+                                                    $out .= "<th>".$aux."</th>"; //put the title in between row headers
                                                 }
+                                                while ($line = mysql_fetch_assoc($qryRSselectResult)) //put each reacord fetched into an associative array variable.
+                                                {
+                                                       
+                                                    $catgry ="";
+                                                    switch ($line["CATEGORIA"]) 
+                                                    {
+                                                        case 1:
+                                                            $catgry = "Convivencia";
+                                                            break;
+                                                        case 2:
+                                                             $catgry = "Academico";
+                                                            break;
+                                                        case 3:
+                                                             $catgry = "Psicologico";
+                                                            break;
+                                                        case 4:
+                                                             $catgry = "Salud";
+                                                            break;
+                                                        case 0:
+                                                             $catgry = "Otro";
+                                                            break;
+                                                    }
                                                     
-                                                $out .= "<tr>"; //add the start of the row for the record on the table
-                                                    $out .= '<td>'.$line["Class"].'</td>';
-                                                    $out .= '<td>'.$line["date_open"].'</td>';
-                                                    $out .= '<td>'.$catgry.'</td>';
-                                                    $out .= '<td>'.$imptce.'</td>';
-                                                    $out .= '<td>'.$line["observation"].'</td>';
-                                                    $out .= '<td>'.$line["objetive"].'</td>';
-                                                    $out .= '<td>'.$line["compromise"].'</td>';
-                                                    $out .= '<td>'.$line["subject"].'</td>';
-                                                    $status = ''.($line["date_close"] == "0000-00-00" ?'Abierto':'Cerrado');
-                                                    $out .= '<td>'.$status.'</td>';
-                                                $out .= "</tr>"; //add the close of the row
-                                            }
-                                            $out .= "</table>"; // add the closing of the table
+                                                    $imptce ="";
+                                                    switch ($line["IMPORTANCIA"]) 
+                                                    {
+                                                        case 1:
+                                                            $imptce = "Bajo";
+                                                            break;
+                                                        case 2:
+                                                             $imptce = "Medio";
+                                                            break;
+                                                        case 3:
+                                                             $imptce = "Alto";
+                                                            break;
+                                                    }
+                                                        
+                                                    $out .= "<tr>"; //add the start of the row for the record on the table
+                                                        $out .= '<td>'.$line["CURSO"].'</td>';
+                                                        $out .= '<td>'.$line["FECHA_A"].'</td>';
+                                                        $out .= '<td>'.$catgry.'</td>';
+                                                        $out .= '<td>'.$imptce.'</td>';
+                                                        $out .= '<td>'.$line["OBSERVACION"].'</td>';
+                                                        $out .= '<td>'.$line["OBJETIVO"].'</td>';
+                                                        $out .= '<td>'.$line["COMPROMISO"].'</td>';
+                                                        $out .= '<td>'.$line["MATERIA"].'</td>';
+                                                        $status = ''.($line["FECHA_C"] == "0000-00-00" ?'Abierto':'Cerrado');
+                                                        $out .= '<td>'.$status.'</td>';
+                                                    $out .= "</tr>"; //add the close of the row
+                                                }
+                                                $out .= "</table>"; // add the closing of the table
                                  ?>       
                     <tr>
                         <td align="center">
-                            Observaciones existentes
+                            <b>Observaciones Existentes</b>
                         </td>
                     </tr>
                     <tr>
@@ -259,32 +252,42 @@
                     </br>
                     </br>
                     <table border="0">
-                        <tr align="center">
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Padre
-                            </td>
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Alumno
-                            </td>
-                            <td align="center" width="200">
-                                -------------------------------<br>
-                                Firma de Director
-                            </td>
-                        </tr>
-                        
-                    </table>
+                    <tr align="center">
+                        <td colspan="3">
+                            <textarea style="overflow:auto;resize:none;width:800px;height:100px"readonly>Comentarios:</textarea>
+                        </td>
+                    </tr>
+                    <tr align="center">
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Padre
+                        </td>
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Alumno
+                        </td>
+                        <td align="center" width="30%">
+                            <br>
+                            -------------------------------<br>
+                            Firma de Director
+                        </td>
+                    </tr>
+                    
+                </table>
                     </br>
                     </br>
+                    <a href="observador.php">Regresar</a>
                            
                            <?php     
+                                            }
                                         }    
                                     }
                                 }
                             ?>
                     
-                <a href="observador.php">regresar</a>
+                
                 
         </form>
 

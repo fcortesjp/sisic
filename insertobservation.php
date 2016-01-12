@@ -8,7 +8,15 @@
     <meta http-equiv="Content-Type" content="text/html"> <!-- charset=utf-8 will make accents show on page but will fuckup if accents come from database-->
     
     <script type="text/javascript" charset="utf-8">
-    
+        
+        function DoTrimRemoveReturns(text)
+        {
+            text = text.replace(/[\s\t\n\r]/g,' '); //replace white, tabs, carriage returns for a space in any part of the string
+            text = text.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); // remove spaces at each end of the string
+            text = text.replace(/\s+/g," "); //this replaces multiple spaces for only one space.
+            return text; //return string fixed
+        }
+
         function reloadtogetclassid(form)
         {
             var cursoid=form.dbCurso.options[form.dbCurso.options.selectedIndex].value;
@@ -32,7 +40,8 @@
         
         function saveObservation()
         {
-            //values of all html components
+            //values of all html components, some free text componentes is cleaned
+
             var insertObserForm = document.getElementById ("observador");
             
             var id = document.getElementById("st_cod").value;
@@ -49,54 +58,56 @@
             var importanceid = importancedd.options[importancedd.selectedIndex].value;
             var importancetext = importancedd.options[importancedd.selectedIndex].text;
             
-            var observ = document.getElementById("observation").value.replace(/^\s+|\s+$/g, '');
-            
-            var objective = document.getElementById("objective").value.replace(/^\s+|\s+$/g, ''); 
-            
-            var compromise = document.getElementById("compromise").value.replace(/^\s+|\s+$/g, ''); 
-            
+            var observ = document.getElementById("observation").value;
+            observ = DoTrimRemoveReturns(observ);
+
+            var objective = document.getElementById("objective").value;
+            objective = DoTrimRemoveReturns(objective);
+
+            var compromise = document.getElementById("compromise").value; 
+            compromise = DoTrimRemoveReturns(compromise);
+
             var subjectdd = document.getElementById("dbClassSubject");
             var subjectid = subjectdd.options[subjectdd.selectedIndex].value;
             var subjecttext = subjectdd.options[subjectdd.selectedIndex].text;
-            
-            //document.getElementById("classsubject").value = subjecttext
             
             //check each required component
             
             if (id.length == 0)
             {
                 alert("el codigo no puede estar vacio");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (date.length == 0)
             {
                 alert("la fecha de apertura no puede estar vacia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (catid == 0)
             {
                 alert("Escoja una categoria");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (importanceid == 0)
             {
                 alert("Escoja un nivel de importancia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             if (observ.length == 0)
             {
                 alert("la observacion no puede estar vacia");
-                return; // return to exit out of the function.
+                return false; // return to exit out of the function.
             }
             
             var message = "";
             
             message += "Codigo: " + id + "\n";
             message += "Alumno: " + name + "\n";
+            message += "Fecha Obs: " + date + "\n";
             message += "Categoria: " + cattext + "\n";
             message += "Importancia: " + importancetext + "\n";
             message += "Observacion: " + observ + "\n";
@@ -107,6 +118,10 @@
             var response=confirm("Desea guardar esta observacion: \n" + message);
             if (response == true)
             {
+                //save clean strings back into the input fields to be passed on for saving 
+                document.getElementById("observation").value = observ;
+                document.getElementById("objective").value = objective;
+                document.getElementById("compromise").value = compromise;
                 
                 insertObserForm.action = "saveobservation.php";
                 insertObserForm.submit();
@@ -148,6 +163,8 @@
         
             <h3>Observaciones</h3>
                 
+                <a href="observador.php">Regresar</a>
+        </br></br>
                 <table align="center" border="1">
                     
                     <tr>
@@ -183,8 +200,15 @@
                                     {
                                         while ($row = mysql_fetch_array($recordset)) 
                                         {
+                                            if ($row['Class ID'] ==  $dbCursoid)
+                                                {// then adds that as one of the options in the dropdown
+                                                    echo "<option value='" . $row['Class ID'] . "' selected>" . $row['Class'] . "</option>";
+                                                }
                                             // then adds that as one of the options in the dropdown
-                                            echo "<option value='" . $row['Class ID'] . "'>" . $row['Class'] . "</option>";
+                                                else
+                                                {
+                                                    echo "<option value='" . $row['Class ID'] . "'>" . $row['Class'] . "</option>";
+                                                }
                                         }
                                     }
                                 ?>
@@ -197,10 +221,10 @@
                                     
                                     if(isset($dbCursoid) and strlen($dbCursoid) > 0)
                                     {
-                                        $sql =  "SELECT `Student ID`,CONCAT(`Student First`,' ',`Student Last`) AS name,`Class ID` ".
-                                                "FROM `Student`" .
-                                                "WHERE `Class ID` = $dbCursoid";
-                                        //$quer="SELECT DISTINCT subcategory FROM subcategory where cat_id=$cat order by subcategory"; 
+                                        $sql =  "SELECT `Student ID`,CONCAT(`Student First`,' ',`Student Last`) AS name,`Class ID`, status ".
+                                                            "FROM `Student`" .
+                                                            "WHERE `Class ID` = $dbCursoid ".
+                                                            "ORDER BY status, `Student Last`;";
                                     }
                                     
                                     
@@ -216,7 +240,7 @@
                                         while ($row = mysql_fetch_array($recordset)) 
                                         {
                                             // then adds that as one of the options in the dropdown
-                                            echo "<option value='" . $row['Student ID'] . "'>" . $row['name'] . "</option>";
+                                            echo "<option value='" . $row['Student ID'] . "'>" . $row['name'] . " (". $row['status'] .  ")</option>";
                                         }
                                     }
                                 ?>
@@ -229,195 +253,228 @@
                             <button onClick="SearchStudent()">Buscar Estudiante</button>
                             </br>
                             </br>
-                            <?php
-                                $st_id = "";
-                                $nombre = "";
-                                $class_id ="";
-                                
-                                if(trim($_POST['studentid']) !== "")
-                                {
-                                    include("config-CRDB.php");
-                                    
-                                    if (!$link) 
-                                    {
-                                        die('Could not connect: ' . mysql_error());
-                                        echo "something wrong with the link to the database";
-                                    }
-                                    else //if connection is good...
-                                    {
-                                        $table = 'Student';
-                                        
-                                        $st_id = $_POST['studentid'];
-                                        
-                                        $sqlselect =  "SELECT `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `$table` WHERE `Student ID` = '$st_id';"; 
-                                        
-                                        $qryrecordset = mysql_query($sqlselect);
-                                        
-                                        $row = mysql_fetch_array($qryrecordset); 
-                                        
-                                        $nombre = $row['name'];
-                                        $class_id = $row['Class ID'];
-                                     
-                                    }
-                                }
-                            ?>
-                            Codigo:<input type="text" name="st_cod" id="st_cod" size="10" value="<?php echo $st_id; ?>" readonly></br>
-                            Nombre:<input type="text" name="st_name" id="st_name" size="40" value="<?php echo $nombre; ?>" readonly></br>
-                            Clase:<input type="text" name="classid" id="classid" size="5" value="<?php echo $class_id; ?>" readonly></br>
-                            
                         </td>
                     </tr>
-                    
-                    <tr>
-                        <td>
-                            Fecha de Apertura
-                        </td>
-                        <td>
-                            <input type="date" name="date_open" id="date_open"/></br>
-                        </td>    
-                    </tr>
-                    
-                        <?php
-                    
-                            //$role = $_SESSION['role'];
-                            
-                            if ($role == 'd') 
-                            {
-                    
-                        ?>
-                                <tr>
-                                    <td>
-                                        Fecha de Cierre
-                                    </td>
-                                    <td>
-                                        <input type="date" name="date_close" id="date_close"/></br>
-                                    </td>    
-                                </tr>
-                        <?php
-                        
-                            }
-                        
-                        ?>
-                    
-                    <tr>
-                        <td>
-                            Categoria
-                        </td>
-                        <td>
-                            <select name="cat" id="cat"/></br>
-                                <option value="0">--Escoja--</option>
-                                <option value="1">Convivencia</option>
-                                <option value="2">Academico</option>
-                                <option value="3">Psicologico</option>
-                                <option value="4">Salud</option>
-                                <option value="5">Otro</option>
-                            </select>
-                        </td>    
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                            Importancia
-                        </td>
-                        <td>
-                            <select name="importance" id="importance"/></br>
-                                <option value="0">--Escoja--</option>
-                                <option value="1">Bajo</option>
-                                <option value="2">Medio</option>
-                                <option value="3">Alto</option>
-                            </select>
-                        </td>    
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                            Observacion
-                        </td>
-                        <td>
-                            <textarea name="observation" id="observation" rows="5" cols="50" maxlength="500"></textarea>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                            Objetivo de la Institucion
-                        </td>
-                        <td>
-                            <textarea name="objective" id="objective" rows="5" cols="50" maxlength="500"></textarea>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                            Compromisos del Alumno
-                        </td>
-                        <td>
-                            <textarea name="compromise" id="compromise" rows="5" cols="50" maxlength="500"></textarea>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td>
-                            Materia (si aplicable)
-                        </td>
-                        <td>
-                            <select name='dbClassSubject' id='dbClassSubject'>
-                                <option value="0">n/a</option>
-                                <?php
-                                
-                                    //include("config-CRDB.php");
-                                    
-                                    if ($role == 'd') 
-                                    {
-                                        $sql =  "SELECT ID, CONCAT(Class.Class, '-', `Class Copesal`.Subject) AS ClassSubject ".
-                                                "FROM `Class Copesal` ". 
-                                                "INNER JOIN Class ".
-                                                "ON `Class Copesal`.ClassID = Class.`Class ID` ".
-                                                //"WHERE TeacherID = '$userID' ".
-                                                "ORDER BY Class.Order;";
-                                    } 
-                                    else 
-                                    {
-                                        $sql =  "SELECT ID, CONCAT(Class.Class, '-', `Class Copesal`.Subject) AS ClassSubject ".
-                                                "FROM `Class Copesal` ". 
-                                                "INNER JOIN Class ".
-                                                "ON `Class Copesal`.ClassID = Class.`Class ID` ".
-                                                "WHERE TeacherID = '$userID' ".
-                                                "ORDER BY Class.Order;";
-                                        
-                                    }
-                                    
-                                    $recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
-                                    
-                                    if (!$link) 
-                                    {
-                                        die('Could not connect: ' . mysql_error());
-                                        echo "something wrong with the link to the database";
-                                    }
-                                    else //if connection is good...
-                                    {
-                                        while ($row = mysql_fetch_array($recordset)) 
-                                        {
-                                            // then adds that as one of the options in the dropdown
-                                            echo "<option value='" . $row['ID'] . "'>" . $row['ClassSubject'] . "</option>";
-                                        }
-                                    }
-                                ?>
-                            </select>
-                            
-                        </td>
-                    </tr>
-                                      
                 </table>
-                
-                </br>
-                
-                <button onClick="saveObservation()">Guardar Observacion</button>
-                
-                </br>
-                
-                <a href="observador.php">regresar</a>
-           
+                <?php
+                    $st_id = "";
+                    $nombre = "";
+                    $class_id ="";
+                    
+                    if(trim($_POST['studentid']) !== "")
+                    {
+                        include("config-CRDB.php");
+                        
+                        if (!$link) 
+                        {
+                            die('Could not connect: ' . mysql_error());
+                            echo "something wrong with the link to the database";
+                        }
+                        else //if connection is good...
+                        {
+                            $table = 'Student';
+                            
+                            $st_id = mysql_real_escape_string($_POST['studentid']);
+                            
+                            $sqlselect =  "SELECT `Class ID`, CONCAT(`Student First`,' ',`Student Last`) AS name FROM `$table` WHERE `Student ID` = '$st_id';"; 
+                            
+                            $qryrecordset = mysql_query($sqlselect);
+                            
+                            $row = mysql_fetch_array($qryrecordset); 
+                            
+                            $nombre = $row['name'];
+                            $class_id = $row['Class ID'];
+
+                            if (isset($nombre) and strlen($nombre) > 0)
+                            {
+                                //id appears on database
+                ?>
+                                <table border="1">
+                                    <tr>
+                                        <td>
+                                            Estudiante a quien</br>
+                                            se le hace la observacion:
+                                        </td>
+                                        <td align="center">
+                                            Codigo:<input type="text" name="st_cod" id="st_cod" size="10" value="<?php echo $st_id; ?>" readonly></br>
+                                            Nombre:<input type="text" name="st_name" id="st_name" size="40" value="<?php echo $nombre; ?>" readonly></br>
+                                            Clase:<input type="text" name="classid" id="classid" size="5" value="<?php echo $class_id; ?>" readonly></br>
+                                        </td>
+                                    </tr> 
+                                    <tr>
+                                        <td>
+                                            Fecha de Apertura
+                                        </td>
+                                        <td>
+                                            <input type="date" name="date_open" id="date_open"/></br>
+                                        </td>    
+                                    </tr>
+                                    
+                                        <?php
+                                    
+                                           //show this row if the user is admin
+                                            
+                                            if ($role == 'd') 
+                                            {
+                                    
+                                        ?>
+                                                <tr>
+                                                    <td>
+                                                        Fecha de Cierre
+                                                    </td>
+                                                    <td>
+                                                        <input type="date" name="date_close" id="date_close"/></br>
+                                                    </td>    
+                                                </tr>
+                                        <?php
+                                        
+                                            }
+                                        
+                                        ?>
+                                    
+                                    <tr>
+                                        <td>
+                                            Categoria
+                                        </td>
+                                        <td>
+                                            <select name="cat" id="cat"/></br>
+                                                <option value="0">--Escoja--</option>
+                                                <option value="1">Convivencia</option>
+                                                <option value="2">Academico</option>
+                                                <option value="3">Psicologico</option>
+                                                <option value="4">Salud</option>
+                                                <option value="5">Otro</option>
+                                            </select>
+                                        </td>    
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            Importancia
+                                        </td>
+                                        <td>
+                                            <select name="importance" id="importance"/></br>
+                                                <option value="0">--Escoja--</option>
+                                                <option value="1">Bajo</option>
+                                                <option value="2">Medio</option>
+                                                <option value="3">Alto</option>
+                                            </select>
+                                        </td>    
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            Observacion
+                                        </td>
+                                        <td>
+                                            <textarea name="observation" id="observation" rows="5" cols="50" maxlength="500"></textarea>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            Objetivo de la Institucion
+                                        </td>
+                                        <td>
+                                            <textarea name="objective" id="objective" rows="5" cols="50" maxlength="500"></textarea>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            Compromisos del Alumno
+                                        </td>
+                                        <td>
+                                            <textarea name="compromise" id="compromise" rows="5" cols="50" maxlength="500"></textarea>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td>
+                                            Materia (si aplicable)
+                                        </td>
+                                        <td>
+                                            <select name='dbClassSubject' id='dbClassSubject'>
+                                                <option value="0">n/a</option>
+                                                <?php
+                                                
+                                                    //include("config-CRDB.php");
+                                                    
+                                                    if ($role == 'd') 
+                                                    {
+                                                        $sql =  "SELECT ID, CONCAT(Class.Class, '-', `Class Copesal`.Subject) AS ClassSubject ".
+                                                                "FROM `Class Copesal` ". 
+                                                                "INNER JOIN Class ".
+                                                                "ON `Class Copesal`.ClassID = Class.`Class ID` ".
+                                                                //"WHERE TeacherID = '$userID' ".
+                                                                "ORDER BY Class.Order;";
+                                                    } 
+                                                    else 
+                                                    {
+                                                        $sql =  "SELECT ID, CONCAT(Class.Class, '-', `Class Copesal`.Subject) AS ClassSubject ".
+                                                                "FROM `Class Copesal` ". 
+                                                                "INNER JOIN Class ".
+                                                                "ON `Class Copesal`.ClassID = Class.`Class ID` ".
+                                                                "WHERE TeacherID = '$userID' ".
+                                                                "ORDER BY Class.Order;";
+                                                        
+                                                    }
+                                                    
+                                                    $recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
+                                                    
+                                                    if (!$link) 
+                                                    {
+                                                        die('Could not connect: ' . mysql_error());
+                                                        echo "something wrong with the link to the database";
+                                                    }
+                                                    else //if connection is good...
+                                                    {
+                                                        while ($row = mysql_fetch_array($recordset)) 
+                                                        {
+                                                            // then adds that as one of the options in the dropdown
+                                                            echo "<option value='" . $row['ID'] . "'>" . $row['ClassSubject'] . "</option>";
+                                                        }
+                                                    }
+                                                ?>
+                                            </select>
+                                            
+                                        </td>
+                                    </tr>
+                                                      
+                                </table>
+                                
+                                </br>
+                                
+                                <button onClick="return saveObservation()">Guardar Observacion</button>
+                                
+                                </br>
+                                
+                                <a href="observador.php">Regresar</a>
+
+                <?php
+
+                            }
+                            else //id does not appear on database
+                            {
+                                ?>
+                                    <table>
+                                        <tr>
+                                            <td colspan="2" align="center">
+                                                <b>Lo sentimos, un alumno con ese codigo no existe!</b></br>
+                                                </br>
+                                                Si el codigo del alumno reportado es correcto pero aun asi</br>
+                                                no aparece en la base de datos reporte esto a administracion.
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                <?php
+                            }
+                         
+                        }
+                    }
+                ?>
+                 
         </form>
 
     </div>
