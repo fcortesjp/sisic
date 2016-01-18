@@ -1,6 +1,6 @@
 <?php
 //$database = "franc451_CR2013";  // the name of the database.
-$database = "franc451_CR2013";
+$database = "franc451_cr2013";
 
 $server = "localhost";  // server to connect to.
 

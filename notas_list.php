@@ -7,7 +7,7 @@
 		$userID = $_SESSION['currentID'];
 		$role = $_SESSION['role'];
 		
-		include("config-CRDB.php"); //including config.php in our file to connect to the database
+		include("config_sisic.php"); //including config.php in our file to connect to the database
 		
 		//get the subjects user/teacher is in charge of or if role is d (director) get all the classes        
         
@@ -15,9 +15,9 @@
 				"FROM `Class Copesal` ". 
 				"INNER JOIN Class ".
 				"ON `Class Copesal`.ClassID = Class.`Class ID` ".
-				"WHERE ID = ".$_POST["CLASS_ID"];
-				
-		$recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
+				"WHERE ID = :ID";
+		$arr = array(":ID" => $_POST["CLASS_ID"]);
+		$recordset = query($sql, $arr);
 		$clases_periodos = "";
 		while ($row = mysql_fetch_array($recordset)) 
         {
@@ -27,10 +27,12 @@
 		$sql = 	"SELECT b.goal as LOGRO, b.ID as ID_LOGRO 
 				FROM indicator a
 				LEFT JOIN goal b ON a.Goal_ID = b.ID
-				WHERE a.`Class Copesal_id` = ".$_POST["CLASS_ID"]."
+				WHERE a.`Class Copesal_id` = :Copesal_id
 				GROUP BY b.goal";
-	
-		$recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
+				
+		$arr = array(":Copesal_id" => $_POST["CLASS_ID"]);
+		$recordset = query($sql, $arr);
+		
 		$clases_periodos = "";
 		$i = 1;
 		$LIST = "";
@@ -40,9 +42,10 @@
 					FROM indicator a
 					LEFT JOIN goal b ON a.Goal_ID = b.ID
 					WHERE a.`Class Copesal_id` = ".$_POST["CLASS_ID"]."
-					AND Goal_ID = ".$row["ID_LOGRO"];
+					AND Goal_ID = :Doal_ID";
+			$arr2 = array("Goal_ID" => $row["ID_LOGRO"]);
+			$recordset2 = query($sql2, $arr2);
 
-			$recordset2 = mysql_query($sql2) or die("error in Query: ". mysql_error());
 			$clases_periodos = "";
 			$i = 1;
 			$INDICATOR = "";
