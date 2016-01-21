@@ -20,11 +20,11 @@
 				"WHERE ID = :ID";
 		$arr = array(":ID" => $_POST["CLASS_ID"]);
 		
-		$recordset = $bd->query($sql, $arr);
+		$recordset_class = $bd->query($sql, $arr);
 		$clases_periodos = "";
-		foreach($recordset as $row) 
+		foreach($recordset_class as $class) 
         {
-        	$CLASS_SUBJECT = $row["ClassSubject"];
+        	$CLASS_SUBJECT = $class["ClassSubject"];
         }
 		
 		$sql = 	"SELECT b.goal as LOGRO, b.ID as ID_LOGRO 
@@ -34,29 +34,31 @@
 				GROUP BY b.goal";
 				
 		$arr = array(":Copesal_id" => $_POST["CLASS_ID"]);
-		$recordset1 = $bd->query($sql, $arr);
+		$recordset_goal = $bd->query($sql, $arr);
 		$clases_periodos = "";
 		$i = 1;
 		$LIST = "";
-		foreach($recordset1 as  $row2) 
+		foreach($recordset_goal as  $goal) 
         {
-        	$sql2 = 	"SELECT a.indicator as INDICATOR, a.ID as ID_INDICATOR
+        	$sql2 = 	"SELECT a.indicator as INDICATOR, a.ID as ID_INDICATOR, c.weigth as WEIGTH
 					FROM indicator a
 					LEFT JOIN goal b ON a.Goal_ID = b.ID
+					LEFT JOIN category c ON a.CategoryID = c.CategoryID
 					WHERE a.`Class Copesal_id` = :Copesal_id
 					AND Goal_ID = :Goal_ID";
-			$arr2 = array(":Goal_ID" => $row2["ID_LOGRO"], ":Copesal_id" => $_POST["CLASS_ID"]);
-			$recordset2 = $bd->query($sql2, $arr2);
+			$arr2 = array(":Goal_ID" => $goal["ID_LOGRO"], ":Copesal_id" => $_POST["CLASS_ID"]);
+			$recordset_indicator = $bd->query($sql2, $arr2);
 
 			$clases_periodos = "";
 			$i = 1;
 			$INDICATOR = "";
 			$NOTAS = "";
-			foreach($recordset2 as $row_logro) 
+			foreach($recordset_indicator as $indicator) 
 	        {
-	        	$INDICATOR .= "<td>".$row_logro["INDICATOR"]."</td>";
-	        	$NOTAS .= "<td><input type='text' size='2' id='NOTA_".$row_logro["ID_INDICATOR"]."_".$_POST["CLASS_ID"]."_".$_POST["PERIODO"]."_###' /></td>";
+	        	$INDICATOR .= "<td>".$indicator["INDICATOR"]." <br /> ".$indicator["WEIGTH"]."%</td>";
+	        	$NOTAS .= "<td><input type='text' size='2' id='NOTA_".$indicator["ID_INDICATOR"]."_".$_POST["CLASS_ID"]."_".$_POST["PERIODO"]."_###' /></td>";
 	        }
+	        $NOTAS .= "<td><input type='text' size='2' id='TOTAL_".$goal["ID_LOGRO"]."_".$_POST["CLASS_ID"]."_".$_POST["PERIODO"]."_###' /></td>";
 	        
 	        $sql_stu = "SELECT a.`Student ID` as identification, CONCAT(a.`Student First`, ' ', a.`Student Last`) as NOMBRES, 
 					a.`Identification`, c.`ID` as ID_CLASE_MATERIA, c.`Subject` as NOMBRE_MATERIA, 
@@ -70,29 +72,26 @@
 			$arr = array(":CLASS_ID" => $_POST["CLASS_ID"]);
 			$recordset_stu = $bd->query($sql_stu, $arr);
 			$STUDENTS = "";
-			foreach($recordset_stu as $row_students) 
+			foreach($recordset_stu as $student) 
 	        {
-	        	$NOTAS2 = str_replace("###", $row_students["identification"], $NOTAS); 
+	        	$NOTAS2 = str_replace("###", $student["identification"], $NOTAS); 
 	        	$STUDENTS .= "<tr>
-	        		<td>".$row_students["identification"]."</td>
-	        		<td>".$row_students["NOMBRES"]."</td>
+	        		<td>".$student["identification"]."</td>
+	        		<td>".$student["NOMBRES"]."</td>
 	        		$NOTAS2
 	        	</tr>";
 	        }
 	        
         	$LIST .= "<tr>
-        		<td colspan='2'><b>LOGRO $i: ".$row["LOGRO"]."</b></td>
+        		<td colspan='2'><b>LOGRO $i: ".$goal["LOGRO"]."</b></td>
         		$INDICATOR
+        		<td>TOTAL</td>
         	</tr>
         	<tr>
         		$STUDENTS
         	</tr>";
         	$i++;
         }
-        
-		// Close de conection
-		mysql_close($link);
-		
 		
 		$diccionario = array( "USUARIO" => $currentUser,
 			"CLASES_PERIODOS" => $clases_periodos,
