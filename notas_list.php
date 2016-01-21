@@ -1,25 +1,28 @@
 <?php
 	session_start();  //session
 	
+	if(!class_exists('bd')){
+		include("config_sisic.php");
+		$bd = new bd();
+	}
+	
 	if(isset($_SESSION['currentUser'])) // if the super global variable session called current user has been initialized then
 	{
 		$currentUser = $_SESSION['currentUser'];
 		$userID = $_SESSION['currentID'];
 		$role = $_SESSION['role'];
 		
-		include("config_sisic.php"); //including config.php in our file to connect to the database
-		
 		//get the subjects user/teacher is in charge of or if role is d (director) get all the classes        
-        
 		$sql = 	"SELECT ID, CONCAT(Class.Class, ' - ', `Class Copesal`.Subject) AS ClassSubject ".
 				"FROM `Class Copesal` ". 
 				"INNER JOIN Class ".
 				"ON `Class Copesal`.ClassID = Class.`Class ID` ".
 				"WHERE ID = :ID";
 		$arr = array(":ID" => $_POST["CLASS_ID"]);
-		$recordset = query($sql, $arr);
+		
+		$recordset = $bd->query($sql, $arr);
 		$clases_periodos = "";
-		while ($row = mysql_fetch_array($recordset)) 
+		foreach($recordset as $row) 
         {
         	$CLASS_SUBJECT = $row["ClassSubject"];
         }
@@ -31,29 +34,28 @@
 				GROUP BY b.goal";
 				
 		$arr = array(":Copesal_id" => $_POST["CLASS_ID"]);
-		$recordset = query($sql, $arr);
-		
+		$recordset1 = $bd->query($sql, $arr);
 		$clases_periodos = "";
 		$i = 1;
 		$LIST = "";
-		while ($row = mysql_fetch_array($recordset)) 
+		foreach($recordset1 as  $row2) 
         {
         	$sql2 = 	"SELECT a.indicator as INDICATOR, a.ID as ID_INDICATOR
 					FROM indicator a
 					LEFT JOIN goal b ON a.Goal_ID = b.ID
-					WHERE a.`Class Copesal_id` = ".$_POST["CLASS_ID"]."
-					AND Goal_ID = :Doal_ID";
-			$arr2 = array("Goal_ID" => $row["ID_LOGRO"]);
-			$recordset2 = query($sql2, $arr2);
+					WHERE a.`Class Copesal_id` = :Copesal_id
+					AND Goal_ID = :Goal_ID";
+			$arr2 = array(":Goal_ID" => $row2["ID_LOGRO"], ":Copesal_id" => $_POST["CLASS_ID"]);
+			$recordset2 = $bd->query($sql2, $arr2);
 
 			$clases_periodos = "";
 			$i = 1;
 			$INDICATOR = "";
 			$NOTAS = "";
-			while ($row_logro = mysql_fetch_array($recordset2)) 
+			foreach($recordset2 as $row_logro) 
 	        {
 	        	$INDICATOR .= "<td>".$row_logro["INDICATOR"]."</td>";
-	        	$NOTAS .= "<td><input type='text' size='2' id='NOTA_".$row_logro["ID_INDICATOR"]."_".$_POST["CLASS_ID"]."_".$_POST["PERIODO"]."' /></td>";
+	        	$NOTAS .= "<td><input type='text' size='2' id='NOTA_".$row_logro["ID_INDICATOR"]."_".$_POST["CLASS_ID"]."_".$_POST["PERIODO"]."_###' /></td>";
 	        }
 	        
 	        $sql_stu = "SELECT a.`Student ID` as identification, CONCAT(a.`Student First`, ' ', a.`Student Last`) as NOMBRES, 
@@ -63,16 +65,18 @@
 					LEFT JOIN `student - class - grade` b ON a.`Student ID` = b.`Student ID`
 					LEFT JOIN `class copesal` c ON b.Class_ID = c.ID
 					LEFT JOIN class d ON c.ClassID = d.`Class ID`
-					WHERE c.ID = ".$_POST["CLASS_ID"];
-		
-			$recordset_stu = mysql_query($sql_stu) or die("error in Query: ". mysql_error());
+					WHERE c.ID = :CLASS_ID";
+					
+			$arr = array(":CLASS_ID" => $_POST["CLASS_ID"]);
+			$recordset_stu = $bd->query($sql_stu, $arr);
 			$STUDENTS = "";
-			while ($row_students = mysql_fetch_array($recordset_stu)) 
+			foreach($recordset_stu as $row_students) 
 	        {
+	        	$NOTAS2 = str_replace("###", $row_students["identification"], $NOTAS); 
 	        	$STUDENTS .= "<tr>
 	        		<td>".$row_students["identification"]."</td>
 	        		<td>".$row_students["NOMBRES"]."</td>
-	        		$NOTAS
+	        		$NOTAS2
 	        	</tr>";
 	        }
 	        

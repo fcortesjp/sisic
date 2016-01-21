@@ -1,13 +1,15 @@
 <?php
 	session_start();  //session
+	if(!class_exists('bd')){
+		include("config_sisic.php"); //including config.php in our file to connect to the database
+		$bd = new bd(); 
+	}
 	
 	if(isset($_SESSION['currentUser'])) // if the super global variable session called current user has been initialized then
 	{
 		$currentUser = $_SESSION['currentUser'];
 		$userID = $_SESSION['currentID'];
 		$role = $_SESSION['role'];
-		
-		include("config_sisic.php"); //including config.php in our file to connect to the database
 		
 		//get the subjects user/teacher is in charge of or if role is d (director) get all the classes
 		if ($role == 'd') 
@@ -27,7 +29,7 @@
 			$arr = array(':TeacherID' => $userID);
 		}
 
-		$resultado = query($sql, $arr);
+		$resultado = $bd->query($sql, $arr);
 				
 		$clases_periodos = "";
 		foreach($resultado as $row) 

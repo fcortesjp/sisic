@@ -1,39 +1,34 @@
 <?php
+require("configuration.php");
 
-	//$database = "franc451_CR2013";  // the name of the database.
-	$database = "franc451_cr2013";
-
-	$server = "localhost";  // server to connect to.
-
-	//string that holds the first part of the pdo object
-	$pdostring = 'mysql:host='.$server.';dbname='.$database.';charset=utf8';
-
-	//$db_user = "franc451_frank34";  // mysql username to access the database with.
-	//$db_user = "franc451_CR2013";
-	$db_user = "root";
-
-	//$db_pass = "52190Lkwdic";  // mysql password to access the database with.
-	$db_pass = "52190Lkwdic";
-
-	try
-	{
-		$conn = new PDO($pdostring, $db_user, $db_pass);
-
-		//attributes
-		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-	}catch(PDOException $ex){
-    	echo 'ERROR: ' . $ex->getMessage();
+class bd extends configuration{
+	private $conexion;
+	
+	public function __construct(){
+		$this->conexion = parent::conectar();
+		return $this->conexion;
 	}
 	
 	function query($sql, $arr){
+		//echo "Haciendo consulta ".$sql."<br />";
 		try {
-			$statement = $conn->prepare($sql);
-            $statement->execute($arr);
-            $resultado = $statement->fetchAll();
-            return $resultado;
+			if($statement = $this->conexion->prepare($sql)){
+				if(count($arr) > 0){
+					if (!$statement->execute($arr)) { //si no se ejecuta la consulta...
+			            print_r($statement->errorInfo()); //imprimir errores
+			        }	
+				}else{
+					if (!$statement->execute()) { //si no se ejecuta la consulta...
+		                print_r($statement->errorInfo()); //imprimir errores
+		            }
+				}
+	            
+	            $resultado = $statement->fetchAll(PDO::FETCH_ASSOC);
+	            return $resultado;
+			}
         } catch(PDOException $ex) {
             echo "An Error occured!"; //handle me.
         }
-	}
+	}		
+}
 ?>
