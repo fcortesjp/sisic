@@ -49,6 +49,14 @@
 			menuForm.submit();
 		}
 		
+		//for teachers and admins
+		function CalNotas() 
+		{
+			var menuForm = document.getElementById ("menu");
+			menuForm.action = "notas.php";
+			menuForm.submit();
+		}
+		
 		
 	</script>
 	
@@ -141,6 +149,12 @@
 							<button type="button" style="height: 100px; width: 100px" name="LogroseIndicadores" align="center" id="LogroseIndicadores" onclick="LogEInd()" >Logros e Indicadores</button>
 						</td>
 					</tr>
+					<tr>
+						<td align = "center" colspan="3">
+							Notas</br>
+							<button type="button" style="height: 100px; width: 100px" name="Notas" align="center" id="Notas" onclick="CalNotas()" >Notas</button>
+						</td>
+					</tr>
 					
 				</table>
 				
@@ -150,16 +164,18 @@
 				
 			
 					
-				<table align="center" border="0">
-					
-					<td align = "center" colspan="2">
-						Logros e Indicadores
-					</tr>
-						
+				<table align="center" border="0">						
 					<tr>
 					
-						<td align = "center" colspan="2"> <!-- button for the "Logros e Indicadores" -->
+						<td align = "center" colspan="3"> <!-- button for the "Logros e Indicadores" -->
+							Logros e Indicadores</br>
 							<button type="button" style="height: 100px; width: 100px" name="LogroseIndicadores" align="center" id="LogroseIndicadores" onclick="LogEInd()" >Logros e Indicadores</button>
+						</td>
+					</tr>
+					<tr>
+						<td align="center" colspan="3">
+							Notas</br>
+							<button type="button" style="height: 100px; width: 100px" name="Notas" align="center" id="Notas" onclick="CalNotas()" >Notas</button>
 						</td>
 							
 					</tr>
