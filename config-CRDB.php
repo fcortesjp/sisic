@@ -1,15 +1,15 @@
 <?php
 //$database = "franc451_CR2013";  // the name of the database.
-$database = "franc451_CR2013";
+$database = "franc451_cr2013";
 
 $server = "localhost";  // server to connect to.
 
 //$db_user = "franc451_frank34";  // mysql username to access the database with.
-$db_user = "franc451_CR2013";
-//$db_user = "root";
+//$db_user = "franc451_CR2013";
+$db_user = "root";
 
-//$db_pass = "52190Lkwdic";  // mysql password to access the database with.
-$db_pass = "52190Lkwdic";
+$db_pass = "52190Lkwdic";  // mysql password to access the database with.
+//$db_pass = "52190Lkwdic";
 //$db_pass = "";
 
 $link = mysql_connect($server, $db_user, $db_pass);

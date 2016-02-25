@@ -1,13 +1,15 @@
 <?php
 	session_start();  //session
+	if(!class_exists('bd')){
+		include("config_sisic.php"); //including config.php in our file to connect to the database
+		$bd = new bd(); 
+	}
 	
 	if(isset($_SESSION['currentUser'])) // if the super global variable session called current user has been initialized then
 	{
 		$currentUser = $_SESSION['currentUser'];
 		$userID = $_SESSION['currentID'];
 		$role = $_SESSION['role'];
-		
-		include("config-CRDB.php"); //including config.php in our file to connect to the database
 		
 		//get the subjects user/teacher is in charge of or if role is d (director) get all the classes
 		if ($role == 'd') 
@@ -22,14 +24,17 @@
 					"FROM `Class Copesal` ". 
 					"INNER JOIN Class ".
 					"ON `Class Copesal`.ClassID = Class.`Class ID` ".
-					"WHERE TeacherID = '$userID' ".
+					"WHERE TeacherID = :TeacherID ".
 					"ORDER BY Class.`Class ID`;";
+			$arr = array(':TeacherID' => $userID);
 		}
+
+		$resultado = $bd->query($sql, $arr);
 				
-		$recordset = mysql_query($sql) or die("error in Query: ". mysql_error());
 		$clases_periodos = "";
-		while ($row = mysql_fetch_array($recordset)) 
+		foreach($resultado as $row) 
         {
+
         	$clases_periodos .= "<tr>";
             $clases_periodos .= "<td>" . $row['ClassSubject'] . "</td>";
             $clases_periodos .= "<td><input type='radio' name='periodo". $row['ID'] ."' id='1' value='1' > 1</input>";
@@ -38,8 +43,7 @@
             $clases_periodos .= "<input type='radio' name='periodo". $row['ID'] ."' id='4' value='4'> 4</input></td>";
             $clases_periodos .= "</tr>";
         }
-		// Close de conection
-		mysql_close($link);
+
 		$diccionario = array( "USUARIO" => $currentUser,
 			"CLASES_PERIODOS" => $clases_periodos
 		);
